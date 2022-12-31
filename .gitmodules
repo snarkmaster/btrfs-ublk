@@ -1,0 +1,15 @@
+[submodule "ubdsrv"]
+	path = ubdsrv
+	url = git@github.com:snarkmaster/ubdsrv.git
+[submodule "liburing"]
+	path = liburing
+	url = https://github.com/axboe/liburing.git
+[submodule "osandov-linux"]
+	path = osandov-linux
+	url = https://github.com/osandov/osandov-linux.git
+[submodule "util-linux"]
+	path = util-linux
+	url = https://github.com/util-linux/util-linux
+[submodule "btrfs-progs"]
+	path = btrfs-progs
+	url = git@github.com:snarkmaster/btrfs-progs.git
