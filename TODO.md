@@ -1,7 +1,7 @@
 # Try
 
-  - Benchmark FUSE `passthrough.c` to see if I match 4K randreads at 5MB/s
-    https://lwn.net/Articles/843873/
+  - Benchmark FUSE `passthrough.c` to see if I also observe 4K randreads at 25MB/s
+    with stock FUSE: https://lwn.net/Articles/843873/
 
   - Maybe not worth it: prod version could park FDs for recovery in
     with `systemd`, instead of relying on paths.
