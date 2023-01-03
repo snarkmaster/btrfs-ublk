@@ -23,6 +23,11 @@ Not all lazy data blocks have to be defined from the get-go.  In fact, in
 typical usage, some out-of-band communication will tell the `ublk` driver to
 map a certain range of blocks.  Reading unmapped blocks can be an error.
 
+The preferred setup for these lazy blocks is to have a large (exabyte-scale)
+address space, so that any new data can just be mapped to new offsets,
+without ever needing to deal with deallocating old offsets (which would
+violate immutability, causing complications with caches).
+
 One application of this idea is lazily provisioning an immutable base layer
 for container filesystems, while retaining the ability to write on top.  In
 this setup, the cost of setting up the filesystem is O(size of metadata +
@@ -36,6 +41,10 @@ Each program has a top-of-file docblock explaining the details.
   - [`check-read-unwritten-block.sh`](check-read-unwritten-block.sh):
     Demonstrates the basic data flow, with lazy blocks getting read as part
     of a local btrfs filesystem.
+
+  - [`bad-make-seed-via-fallocate.sh`](bad-make-seed-via-fallocate.sh):
+    Initially, I tried making the special `btrfs` via stock `mkfs.btrfs`
+    plus `fallocate`, but that turned out to be a bad idea.
 
 TODO: Currently adding more demos / benchmarks.
 
@@ -142,16 +151,6 @@ EOF
 ```
 ./bin/vm.py create test1
 ./bin/vm.py archinstall --mkfs-cmd mkfs.btrfs test1
-```
-
-  - If you see [openssl signature errors](
-    https://bbs.archlinux.org/viewtopic.php?id=282191), you may need to 
-    manually patch the setup script. NB: `pacstrap -K` may also work.
-
-```
-+pacman -Sy archlinux-keyring
-+
- pacstrap /mnt "${packages[@]}"
 ```
 
   - Boot the VM, exposing one host directory as R/O, another as R/W.
