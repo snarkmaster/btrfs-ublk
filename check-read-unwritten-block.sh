@@ -86,7 +86,6 @@ mount s.btrfs vol/
 truncate -s 1G rw.btrfs
 rw_loop=$(losetup --show -f rw.btrfs)
 btrfs device add "$rw_loop" vol/
-losetup -d "$rw_loop"
 # `nodatasum` is to clone from `.btrfs-ublk-virtual-data` since this huge,
 # lazy-loaded area cannot have precomputed checksums.
 mount -o remount,rw,nodatasum vol/

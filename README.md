@@ -67,6 +67,34 @@ You will want to apply subsequent sections to the environment is doing the
 build, and/or the execution.  But, before you get started with a VM, first
 review "Tips on working in a VM".
 
+# Isn't it fragile to provide logical files as physical blocks?
+
+In most settings, it would be.  Specifically, `btrfs` is a CoW filesystem,
+so for any writable filesystem it is permitted to replace any logical
+content with pointers to new physical blocks with the same data.  There is
+no **general** guarantee that the mapping from logical to physical bloks
+remains stable or continuous.
+
+However, we use a very special setup that *is* safe. 
+ - The "virtual data" file is on a seed device. Seed devices are intended
+   for read-only media, and thus will not change after `btrfstune -S 1`.
+ - Before putting the seed device into use, we can -- [and do](
+   https://github.com/snarkmaster/btrfs-ublk/blob/main/check-read-unwritten-block.sh#L95)
+   -- assert (via `btrfs_map_physical`) that the logical<->physical mapping
+   is as expected.
+ - In-kernel `btrfs` is of course required to maintain format compatibility
+   with older filesystems, so a once-valid, immutable seed device should
+   remain valid forever. 
+
+There is a further wrinkle, which is that normally, btrfs checksums every
+block, and stores the checksums as part of filesystem metadata.  Our virtual
+blocks are not known in advance, and it's not reasonable to build a block
+device that tries to hallucinate the right checksum metadata blocks as lazy
+blocks get mapped.  So instead, the "virtual data" inode is marked
+`nodatasum`, which implies certain limitations on how it can be used.
+
+TODO: Link to discussion of the limitations, and what to do about them.
+
 # Build requirements
 
   - `git clone` this repo.
