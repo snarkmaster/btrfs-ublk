@@ -1,0 +1,10 @@
+[flake8]
+max-line-length = 80
+extend-ignore = E203
+# Don't lint third-party submodules
+exclude =
+    btrfs-progs
+    liburing
+    osandov-linux
+    ubdsrv
+    util-linux

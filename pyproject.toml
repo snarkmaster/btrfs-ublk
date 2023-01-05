@@ -1,0 +1,23 @@
+[tool.pytest.ini_options]
+python_files = "*.py"
+# Don't test third-party submodules, they do not use `pytest`.
+norecursedirs = ["btrfs-progs", "liburing", "osandov-linux", "ubdsrv", "util-linux"]
+
+[tool.black]
+line-length = 80
+skip-string-normalization = true
+# Don't reformat third-party submodules.
+extend-exclude = '''
+/(
+  | btrfs-progs
+  | liburing
+  | osandov-linux
+  | ubdsrv
+  | util-linux
+)/
+'''
+
+[tool.isort]
+profile = "black"
+# Don't import-sort third-party submodules
+skip_glob = ["btrfs-progs/**", "liburing/**", "osandov-linux/**", "ubdsrv/**", "util-linux/**"]

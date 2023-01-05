@@ -1,6 +1,5 @@
 #!/bin/bash
 set -uex -o pipefail
-# Please keep this `shellcheck`-clean, or rewrite it in a better language.
 
 # Demonstrates the basic `btrfs-ublk` data flow:
 #
@@ -46,7 +45,7 @@ assert_eq 0 0 equality_ok
 
 # Recommend a mount namespace so that the mount doesn't leak.
 if ! capsh --has-p=CAP_SYS_ADMIN ; then
-  echo "Please run this via \`sudo ./isolate.sh $0\`"
+  echo "Please run this via \`sudo ./isolate.sh $0\`" >&2
   exit 1
 fi
 
@@ -113,6 +112,7 @@ assert_eq \
   "$(echo "$phys_map" | tail -n 1 | cut -f 2)" \
   "$(echo "$phys_map" | tail -n 1 | cut -f 7)" \
   "file size != physical size"
+# FIXME: There is no general reason for this to be true, I think?
 assert_eq \
   "$(echo "$phys_map" | tail -n 1 | cut -f 6)" \
   "$(echo "$phys_map" | tail -n 1 | cut -f 9)" \

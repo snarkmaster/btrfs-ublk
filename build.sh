@@ -1,6 +1,5 @@
 #!/bin/bash
 set -uex -o pipefail
-# Please keep this `shellcheck`-clean, or rewrite it in a better language.
 
 # Environment variables that affect the build, besides whatever `configure`
 # and `make` look for anyway.

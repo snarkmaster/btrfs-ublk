@@ -38,7 +38,8 @@ cost of downloading the entire filesystem.
 
 Each program has a top-of-file docblock explaining the details. 
 
-  - [`check-read-unwritten-block.sh`](check-read-unwritten-block.sh):
+  - [`read-unwritten-block-via-mega-extent.sh`](
+    read-unwritten-block-via-mega-extent.sh):
     Demonstrates the basic data flow, with lazy blocks getting read as part
     of a local btrfs filesystem.
 
@@ -79,7 +80,7 @@ However, we use a very special setup that *is* safe.
  - The "virtual data" file is on a seed device. Seed devices are intended
    for read-only media, and thus will not change after `btrfstune -S 1`.
  - Before putting the seed device into use, we can -- [and do](
-   https://github.com/snarkmaster/btrfs-ublk/blob/main/check-read-unwritten-block.sh#L95)
+   https://github.com/snarkmaster/btrfs-ublk/blob/main/src/physical_map.py#L101)
    -- assert (via `btrfs_map_physical`) that the logical<->physical mapping
    is as expected.
  - In-kernel `btrfs` is of course required to maintain format compatibility
@@ -110,8 +111,9 @@ TODO: Link to discussion of the limitations, and what to do about them.
 ## Fedora 36
 
 ```
-dnf install -y automake autoconf libtool e2fsprogs-devel libzstd-devel \
-  libudev-devel python3.10-devel gettext-devel
+dnf install -y automake autoconf libtool e2fsprogs-devel libzstd-devel black \
+  libudev-devel python3.10-devel gettext-devel python3-pytest python3-flake8 \
+  python3-isort ShellCheck
 ```
 
 If you want to build statically linked binaries for VMs, also run:
@@ -138,6 +140,20 @@ Keep in mind that if a demo crashes or is interrupted, it might still leak
 some resources.  Most notably, loopback devices (`losetup -l`) or ublk
 devices (`sudo ./ubdsrv/ublk list`), are not automatically reaped by the
 above.
+
+# Contributing
+
+First off, thank you! The best practices are:
+
+```
+./apply-lint.sh || echo "Please make your pull request lint-clean!"
+pytest
+```
+
+Also, if you add new functionality, please do add unit tests.
+
+Keep in mind that this is a "demo" project at this point, so it may take a
+while for your pull request to get triaged.
 
 # Benchmarks
 
