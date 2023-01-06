@@ -39,7 +39,9 @@ cost of downloading the entire filesystem.
 Each program has a top-of-file docblock explaining the details. 
 
   - [`read-unwritten-block-via-mega-extent.sh`](
-    read-unwritten-block-via-mega-extent.sh):
+    read-unwritten-block-via-mega-extent.sh) and 
+    [`read-unwritten-block-via-mega-extent.py`](
+    read-unwritten-block-via-mega-extent.py):
     Demonstrates the basic data flow, with lazy blocks getting read as part
     of a local btrfs filesystem.
 
@@ -158,9 +160,10 @@ while for your pull request to get triaged.
 # Benchmarks
 
 These are on a i7-9750H laptop with Fedora 36.  Note, this is far from the
-final word.  For example both `io_uring` publish benchmarks showing over
-1.5M QPS on stock hardware, so this benchmark is probably not correct, but
-at least it sets a baseline.
+final word.  For example `io_uring` benchmarks show over 1.5M QPS / core on
+stock hardware, while `ublk` [demonstrated 1.2M IOPS](
+https://github.com/ming1/ubdsrv/blob/master/doc/ublk_intro.pdf).  So this
+benchmark is probably not correct, but at least it sets a baseline.
 
 Baseline on `/dev/zero`.
 
@@ -171,6 +174,53 @@ fio --name=rand-4k --bs=4k --ioengine=io_uring --rw=randread --runtime=20 \
 ```
 
 TODO: Add real benchmarks here.
+
+# Related solutions
+
+This is neither the first, nor the last idea for providing lazy-fetched
+filesystems.  However, it is somewhat different from the prior work known to
+the author.
+
+TODO: Write some comparative words about Nydus + EROFS + fscache, [incfs](
+https://source.android.com/docs/core/architecture/kernel/incfs), DADI, virtiofs,
+plan9 & [LISAFS](https://gvisor.dev/docs/user_guide/filesystem/), FUSE 
+(including the as-yet-unmerged `FUSE_PASSTHROUGH` patches, OverlayFS, and [this
+discussion](https://www.spinics.net/lists/linux-unionfs/msg08972.html)).
+
+## Technologies not considered
+
+If any rationale given is bad, please file an issue or a PR.
+
+  * NFS, SMB, & other read-write network filesystem protocols.
+
+    * These are quite complex to integrate and maintain, because they’re
+      oriented primarily towards read-write workloads, including
+      multi-writer support.  Diatribes against R/W network POSIX to read:
+      [1](https://www.nextplatform.com/2017/09/11/whats-bad-posix-io/),
+      [2](https://www.time-travellers.org/shane/papers/NFS_considered_harmful.html),
+      [3](https://www.kernel.org/doc/ols/2006/ols2006v2-pages-59-72.pdf) —
+      note that IIRC this genre dates back to the 1980s.  The root cause of
+      the badness is that multi-writer network POSIX runs afoul of the CAP
+      theorem.
+
+    * Multi-writer support isn't really useful for cloud container
+      filesystem, the bulk of such use-cases only wants lazy reads.
+
+  * Other non-local block devices.  The fundamental reason they are omitted is
+    that `ublk` is roughly as fast and simple as possible ([1.2M IOPS on a
+    laptop VM](https://github.com/ming1/ubdsrv/blob/master/doc/ublk_intro.pdf)).
+    So, for the present btrfs seed device hack, the various other block
+    device interfaces offer no benefit.
+
+    * [NBD](https://nbd.sourceforge.io/): `ublk` is a more modern version of
+      the idea that essentially supersedes NBD — `ublk` is simpler and
+      faster.
+
+    * iSCSI: Another remote block solution that is even more messy to
+      integrate than NBD.  Its main differentiator is that it’s more
+      cross-platform than anything else on the list.  On the flip-side, in
+      some informal experiments on Linux + iSCSI, it only achieved tolerable
+      performance on fast, wired local network.
 
 # Tips on working in a VM
 
