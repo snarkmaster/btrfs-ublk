@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 '''
-This is a Python clone of `demo-via-mega-extent.sh`, just to demonstrate
-library usage.  The docs are at the top of the shell script.
+This is a Python clone of `demo-via-mega-extent.sh` -- refer to the docs
+at the top of that shell script.
 
 Unlike the shell variant, you can pass `--use-fallocate-seed` to try the
 seed device creation strategy from `bad-make-seed-via-fallocate.sh`.

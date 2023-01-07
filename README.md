@@ -38,11 +38,14 @@ cost of downloading the entire filesystem.
 
 Each program has a top-of-file docblock explaining the details. 
 
-  - [`demo-via-mega-extent.sh`](demo-via-mega-extent.sh) and 
-    [`demo-via-mega-extent.py`](demo-via-mega-extent.py): Demonstrates the
-    basic data flow, with lazy blocks getting read as part of a local btrfs
-    filesystem.  The Python variant also shows that `fallocate` +
-    `btrfs_corrupt_block` does (kind of) work as an allocation strategy.
+  - [`demo-via-mega-extent.sh`](demo-via-mega-extent.sh) and
+    [`demo-generic.py`](demo-generic.py): Demonstrates the basic data flow,
+    with "lazy" blocks successfully being read from CoW-cloned files on a
+    btrfs filesystem, after being written directly to the underlying seed
+    device.  The Python variant shows two seed device formatting strategies:
+      - a performant "mega-extent" approach via hacked-up `btrfs-progs`, and
+      - the very kludgy `fallocate` + `btrfs_corrupt_block` hack, which also
+        works, kind of.
 
   - [`bad-make-seed-via-fallocate.sh`](bad-make-seed-via-fallocate.sh):
     Initially, I tried making the special `btrfs` via stock `mkfs.btrfs`
