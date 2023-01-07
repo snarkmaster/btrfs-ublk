@@ -46,6 +46,7 @@ def init_cli(description: str, argv: Optional[List[str]] = None):
     p.add_argument('--rw-fs-size', default='1G', type=suffixed_byte_size)
     p.add_argument('--btrfs-ublk-dir', default=my_dir)
 
-    yield cli  # Allow calling CLI to add its own args.
+    cli.parser = p
+    yield cli  # Allow calling CLI to add its own args to the parser.
 
     cli.args = p.parse_args(argv[1:])

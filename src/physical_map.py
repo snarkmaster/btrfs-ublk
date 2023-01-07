@@ -224,7 +224,7 @@ def validate_virtual_data(
     #  - each logical extent maps 1:1 to a physical extent
     # So, it is enough to take the larges physical contig, and find its file
     # extents.
-    big_phys_off, big_phys_size = max(phys_contigs, key=lambda x: x[1])
+    big_phys_off, big_size = max(phys_contigs, key=lambda x: x[1])
     file_offset_matches = [
         (row[COL_FILE_OFFSET], row[COL_EXTENT_OFFSET])
         for row in phys_map
@@ -239,13 +239,17 @@ def validate_virtual_data(
         f'{file_offset_matches[0][0]}, in {phys_map}'
     )
 
-    return file_offset_matches[0][0], big_phys_off, big_phys_size
+    log.info(
+        f'Found continuous {big_size / SZ.T} TiB file/physical map at offsets:'
+        f' file - {file_offset_matches[0][0]}, physical - {big_phys_off}'
+    )
+    return file_offset_matches[0][0], big_phys_off, big_size
 
 
 def test_single_extent():
     '''
     The simple one-line test input is the actual "virtual data" file
-    produced by `read-unwritten-block-via-mega-extent.sh` and
+    produced by `demo-via-mega-extent.sh` and
     `temp_mega_extent_seed_device()` via a modified `mkfs.btrfs`.  While it
     deviates from standard btrfs extent/chunk sizing, is the simplest
     "virtual data" layout that works for `btrfs-ublk`.

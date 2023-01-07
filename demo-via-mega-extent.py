@@ -1,21 +1,26 @@
 #!/usr/bin/env python3
 '''
-This is a Python clone of `read-unwritten-block-via-mega-extent.sh`, just to
-demonstrate library usage. The docs are at the top of the shell script.
+This is a Python clone of `demo-via-mega-extent.sh`, just to demonstrate
+library usage.  The docs are at the top of the shell script.
+
+Unlike the shell variant, you can pass `--use-fallocate-seed` to try the
+seed device creation strategy from `bad-make-seed-via-fallocate.sh`.
 '''
 
 import argparse
 import os
+import sys
 from contextlib import ExitStack
 
 from src import physical_map
 from src.btrfs_ublk import (
     loop_dev,
     set_up_temp_seed_backed_mount,
+    temp_fallocate_seed_device,
     temp_mega_extent_seed_device,
 )
 from src.cli import init_cli
-from src.common import SZ, assert_file_smaller_than, get_logger
+from src.common import SZ, Path, assert_file_smaller_than, get_logger
 
 log = get_logger()
 
@@ -28,8 +33,15 @@ def copy_full_range(src, dst, count, offset_src, offset_dst):
         offset_dst += ret
 
 
-def main(stack: ExitStack, opts: argparse.Namespace):
-    seed = stack.enter_context(temp_mega_extent_seed_device(opts))
+def logical_reads_of_physical_writes(
+    stack: ExitStack,
+    opts: argparse.Namespace,
+    seed: Path,
+    # With the `fallocate` strategy, not all sizes will result in a
+    # reasonably large continuous file-physical mapping.  Assert we got at
+    # least this much.
+    min_continuous_size: int,
+):
     seed_loop = stack.enter_context(loop_dev(seed))
     vol, rw_backing = set_up_temp_seed_backed_mount(stack, opts, seed_loop)
     virtual_data = vol / opts.virtual_data_filename
@@ -38,8 +50,7 @@ def main(stack: ExitStack, opts: argparse.Namespace):
             physical_map.read_raw(opts.btrfs_ublk_dir, virtual_data)
         )
     )
-    assert file_offset == 0, file_offset
-    assert size == 4611686018427387904, size
+    assert size >= min_continuous_size, size
     offset_75pct = 3 * (size // 4)
 
     virt_data_fd = stack.enter_context(open(virtual_data, 'r')).fileno()
@@ -76,8 +87,32 @@ def main(stack: ExitStack, opts: argparse.Namespace):
     assert_file_smaller_than(rw_backing, 10 * SZ.M)
 
 
+def main(stack: ExitStack, opts: argparse.Namespace):
+    if opts.use_fallocate_seed:
+        if opts.virtual_data_size > SZ.T:
+            sys.exit(
+                '''\
+`--use-fallocate-seed` can only be used with `--virtual-data-size` smaller \
+than 1T.  Otherwise, filesystem setup will be VERY slow due to the fact that \
+we use `btrfs_corrupt_block` internally.  This could be improved, but isn't \
+worthwhile today.  Keep in mind that `fallocate -l 10P` itself hits further \
+perf bottlenecks -- in one experiment, I let it run for > 1000 minutes \
+before killing.\
+'''
+            )
+        seed = stack.enter_context(temp_fallocate_seed_device(opts))
+        # Asserting that at least 80% of the file map continuously WILL fail
+        # for some corner-case sizes, but ...  300G seems to work fine.
+        min_continuous_size = 4 * (opts.virtual_data_size / 5)
+    else:
+        seed = stack.enter_context(temp_mega_extent_seed_device(opts))
+        # The mega-extent guarantees the whole file is continuous.
+        min_continuous_size = opts.virtual_data_size
+    logical_reads_of_physical_writes(stack, opts, seed, min_continuous_size)
+
+
 if __name__ == '__main__':
     with init_cli(__doc__) as cli:
-        pass
+        cli.parser.add_argument('--use-fallocate-seed', action='store_true')
     with ExitStack() as stack:
         main(stack, cli.args)

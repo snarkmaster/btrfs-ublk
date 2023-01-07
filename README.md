@@ -38,12 +38,11 @@ cost of downloading the entire filesystem.
 
 Each program has a top-of-file docblock explaining the details. 
 
-  - [`read-unwritten-block-via-mega-extent.sh`](
-    read-unwritten-block-via-mega-extent.sh) and 
-    [`read-unwritten-block-via-mega-extent.py`](
-    read-unwritten-block-via-mega-extent.py):
-    Demonstrates the basic data flow, with lazy blocks getting read as part
-    of a local btrfs filesystem.
+  - [`demo-via-mega-extent.sh`](demo-via-mega-extent.sh) and 
+    [`demo-via-mega-extent.py`](demo-via-mega-extent.py): Demonstrates the
+    basic data flow, with lazy blocks getting read as part of a local btrfs
+    filesystem.  The Python variant also shows that `fallocate` +
+    `btrfs_corrupt_block` does (kind of) work as an allocation strategy.
 
   - [`bad-make-seed-via-fallocate.sh`](bad-make-seed-via-fallocate.sh):
     Initially, I tried making the special `btrfs` via stock `mkfs.btrfs`
