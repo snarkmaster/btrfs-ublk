@@ -26,7 +26,7 @@ def init_cli(description: str, argv: Optional[List[str]] = None):
         format='\x1b[1m%(asctime)s %(levelname)s:\x1b[0m %(message)s',
     )
 
-    if 0 != subprocess.run(['capsh', '--has-p=CAP_SYS_ADMIN']).returncode:
+    if subprocess.run(['capsh', '--has-p=CAP_SYS_ADMIN'], stdout=2).returncode:
         log.error(f'Please run this via `sudo ./isolate.sh {argv[0]}`')
         sys.exit(1)
 
@@ -42,7 +42,6 @@ def init_cli(description: str, argv: Optional[List[str]] = None):
     p.add_argument(
         '--virtual-data-filename', default='.btrfs-ublk-virtual-data'
     )
-    p.add_argument('--virtual-data-size', default='4E', type=suffixed_byte_size)
     p.add_argument('--rw-fs-size', default='1G', type=suffixed_byte_size)
     p.add_argument('--btrfs-ublk-dir', default=my_dir)
 

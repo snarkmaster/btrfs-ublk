@@ -51,7 +51,10 @@ Each program has a top-of-file docblock explaining the details.
     Initially, I tried making the special `btrfs` via stock `mkfs.btrfs`
     plus `fallocate`, but that turned out to be a bad idea.
 
-TODO: Currently adding more demos / benchmarks.
+  - [`benchmark.py`](benchmark.py) and [`benchmark_matrix.py`](
+    benchmark_matrix.py): Exercises 4KiB random reads -- as the type of IO
+    most sensitive to "plumbing overhead" -- most in a variety of settings
+    against `btrfs-ublk`. See the "Benchmarks" section.
 
 # Development scenarios
 
@@ -167,15 +170,18 @@ stock hardware, while `ublk` [demonstrated 1.2M IOPS](
 https://github.com/ming1/ubdsrv/blob/master/doc/ublk_intro.pdf).  So this
 benchmark is probably not correct, but at least it sets a baseline.
 
-Baseline on `/dev/zero`.
+A single-core "speed of light" baseline on `/dev/zero`:
 
 ```
 fio --name=rand-4k --bs=4k --ioengine=io_uring --rw=randread --runtime=20 \
-    --iodepth=16 --filename=/dev/zero --norandommap --size=2G --loop=50
-  read: IOPS=734k, BW=2867MiB/s (3006MB/s)(56.0GiB/20000msec)
+    --iodepth=16 --filename=/dev/zero --norandommap --size=5G --loop=1000
+  read: IOPS=704k, BW=2752MiB/s (2886MB/s)(53.7GiB/20000msec)
 ```
 
-TODO: Add real benchmarks here.
+TODO: Add the other comparatives mentioned in `benchmark_matrix.py`.
+
+TODO / WIP: Summarize the results from `benchmark_matrix.py`. Touch on
+the page cache effects of `mmap`.
 
 # Related solutions
 

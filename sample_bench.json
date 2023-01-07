@@ -1,0 +1,11 @@
+{
+    "btrfs.seed": "mega-extent",
+    "btrfs.total_clone_size": "5G",
+    "btrfs.virtual_data_size": "275G",
+    "fio.depth": 8,
+    "fio.direct": 1,
+    "fio.engine": "io_uring",
+    "fio.jobs": 1,
+    "fio.runtime": 60,
+    "ublk.num_queues": 2
+}

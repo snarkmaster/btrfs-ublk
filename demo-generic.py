@@ -14,23 +14,22 @@ from contextlib import ExitStack
 
 from src import physical_map
 from src.btrfs_ublk import (
+    copy_full_range,
     loop_dev,
     set_up_temp_seed_backed_mount,
     temp_fallocate_seed_device,
     temp_mega_extent_seed_device,
 )
 from src.cli import init_cli
-from src.common import SZ, Path, assert_file_smaller_than, get_logger
+from src.common import (
+    SZ,
+    Path,
+    assert_file_smaller_than,
+    get_logger,
+    suffixed_byte_size,
+)
 
 log = get_logger()
-
-
-def copy_full_range(src, dst, count, offset_src, offset_dst):
-    while count:
-        ret = os.copy_file_range(src, dst, count, offset_src, offset_dst)
-        count -= ret
-        offset_src += ret
-        offset_dst += ret
 
 
 def logical_reads_of_physical_writes(
@@ -55,7 +54,7 @@ def logical_reads_of_physical_writes(
 
     virt_data_fd = stack.enter_context(open(virtual_data, 'r')).fileno()
 
-    log.info(f'Starting to clone into {vol}/{{start,end,mind}}...')
+    log.info(f'Cloning into {vol}/{{start,end,mind}}...')
 
     start_fd = stack.enter_context(open(vol / 'start', 'w+')).fileno()
     mid_fd = stack.enter_context(open(vol / 'mid', 'w+')).fileno()
@@ -100,12 +99,16 @@ perf bottlenecks -- in one experiment, I let it run for > 1000 minutes \
 before killing.\
 '''
             )
-        seed = stack.enter_context(temp_fallocate_seed_device(opts))
+        seed = stack.enter_context(
+            temp_fallocate_seed_device(opts, opts.virtual_data_size)
+        )
         # Asserting that at least 80% of the file map continuously WILL fail
         # for some corner-case sizes, but ...  300G seems to work fine.
         min_continuous_size = 4 * (opts.virtual_data_size / 5)
     else:
-        seed = stack.enter_context(temp_mega_extent_seed_device(opts))
+        seed = stack.enter_context(
+            temp_mega_extent_seed_device(opts, opts.virtual_data_size)
+        )
         # The mega-extent guarantees the whole file is continuous.
         min_continuous_size = opts.virtual_data_size
     logical_reads_of_physical_writes(stack, opts, seed, min_continuous_size)
@@ -113,6 +116,9 @@ before killing.\
 
 if __name__ == '__main__':
     with init_cli(__doc__) as cli:
+        cli.parser.add_argument(
+            '--virtual-data-size', default='4E', type=suffixed_byte_size
+        )
         cli.parser.add_argument('--use-fallocate-seed', action='store_true')
     with ExitStack() as stack:
         main(stack, cli.args)

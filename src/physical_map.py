@@ -243,6 +243,10 @@ def validate_virtual_data(
         f'Found continuous {big_size / SZ.T} TiB file/physical map at offsets:'
         f' file - {file_offset_matches[0][0]}, physical - {big_phys_off}'
     )
+    # btrfs sector alignment is required for cloning
+    assert file_offset_matches[0][0] % 4096 == 0
+    assert big_phys_off % 4096 == 0
+    assert big_size % 4096 == 0, big_size
     return file_offset_matches[0][0], big_phys_off, big_size
 
 
