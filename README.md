@@ -49,12 +49,16 @@ Each program has a top-of-file docblock explaining the details.
 
   - [`bad-make-seed-via-fallocate.sh`](bad-make-seed-via-fallocate.sh):
     Initially, I tried making the special `btrfs` via stock `mkfs.btrfs`
-    plus `fallocate`, but that turned out to be a bad idea.
+    plus `fallocate`, but that turned out to be a bad idea. That said,
+    it does have a working implementation as [`temp_fallocate_seed_device`](
+    https://github.com/snarkmaster/btrfs-ublk/blob/main/src/btrfs_ublk.py#L155),
+    and a [corresponding benchmark](
+    https://github.com/snarkmaster/btrfs-ublk/blob/main/benchmark_matrix.py#L36).
 
   - [`benchmark.py`](benchmark.py) and [`benchmark_matrix.py`](
-    benchmark_matrix.py): Exercises 4KiB random reads -- as the type of IO
-    most sensitive to "plumbing overhead" -- most in a variety of settings
-    against `btrfs-ublk`. See the "Benchmarks" section.
+    benchmark_matrix.py): Exercises `btrfs-ublk` with 4KiB random reads (the
+    type of IO most sensitive to "plumbing overhead") in a variety of
+    settings.  See the "Benchmarks" section.
 
 # Development scenarios
 
@@ -183,6 +187,9 @@ TODO: Add the other comparatives mentioned in `benchmark_matrix.py`.
 TODO / WIP: Summarize the results from `benchmark_matrix.py`. Touch on
 the page cache effects of `mmap`.
 
+TODO: Add a `ublk` mode where virtual reads are backed by O_DIRECT reads
+from local SSD to see how much worse things get.
+
 # Related solutions
 
 This is neither the first, nor the last idea for providing lazy-fetched
@@ -194,6 +201,13 @@ https://source.android.com/docs/core/architecture/kernel/incfs), DADI, virtiofs,
 plan9 & [LISAFS](https://gvisor.dev/docs/user_guide/filesystem/), FUSE 
 (including the as-yet-unmerged `FUSE_PASSTHROUGH` patches, OverlayFS, and [this
 discussion](https://www.spinics.net/lists/linux-unionfs/msg08972.html)).
+
+TODO: Maybe cite
+https://www.usenix.org/system/files/conference/fast17/fast17-vangoor.pdf
+(issue: the top rand-read native SSD IOPS they report is around 25K, whereas
+my 3/4-year-old SSD happily pushes over 300K.
+
+TODO: Cite other references from my pile.
 
 ## Technologies not considered
 
