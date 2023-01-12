@@ -56,7 +56,7 @@ def temp_mount_validate_virtual_data(
 # code-generated, or when human-edited -- painfully explicit.
 #
 # Future: Try varying other ublk options as noted in `ublk_loop_dev()`.
-_OPTS_KEYS = {
+OPTION_KEYS = {
     'btrfs.seed',  # Formatting strategy: `fallocate` or `mega-extent`
     # Keep this < 1T for `fallocate`, since our poor, quick-and-dirty
     # implementation causes formatting to become much slower with size.
@@ -75,7 +75,7 @@ _OPTS_KEYS = {
 
 def main(stack: ExitStack, opts: argparse.Namespace):
     o = opts.json_opts
-    mismatch_keys = set(o.keys()).symmetric_difference(_OPTS_KEYS)
+    mismatch_keys = set(o.keys()).symmetric_difference(OPTION_KEYS)
     assert not mismatch_keys, mismatch_keys
 
     virtual_data_size = suffixed_byte_size(o['btrfs.virtual_data_size'])

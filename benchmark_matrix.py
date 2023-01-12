@@ -13,12 +13,12 @@ heat management, OS background activities, etc.  In `mmap` mode, keeping
 things short also reduces "mostly page cache" measurements on smaller file
 sizes like 5G.
 
-TODO: Expand the matrix to cover non-direct IO, and to vary IO depths in
-async modes.
+TODO: Expand the matrix to cover non-direct IO (drop caches, use a single
+reader, drop `--norandommap`), and to vary IO depths in async modes (in my
+limited tests, IO depth > 4 makes little difference).
 
-TODO: For each unique set of `fio` options also automatically benchmark
-comparatives: reading from `/dev/zero`, a file on `tmpfs`, an `fallocate`d
-file on the local fs (btrfs for me), and a regular file on the local fs.
+TODO: For each unique set of `fio` options it'd be cool to also
+automatically benchmark comparatives as in README.md#Benchmarks.
 '''
 import argparse
 import json
