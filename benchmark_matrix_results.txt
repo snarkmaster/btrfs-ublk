@@ -1,0 +1,122 @@
+[1m2023-01-14 18:23:35,084 INFO:[0m Tested 96 cfgs, 2880 times
+
+[1m2023-01-14 18:23:35,095 INFO:[0m Comparing selected values for ['btrfs.seed', 'btrfs.virtual_data_size', 'btrfs.total_clone_size']:
+  - Best-config IOPS by ['fio.engine']:
+    ['io_uring']:
+      ['fallocate', '275G', '2G']:	642,504
+      ['fallocate', '275G', '200G']:	631,705
+      ['mega-extent', '275G', '2G']:	638,144
+      ['mega-extent', '275G', '200G']:	628,270
+      ['mega-extent', '4E', '2G']:	634,542
+      ['mega-extent', '4E', '200G']:	626,932
+    ['mmap']:
+      ['fallocate', '275G', '2G']:	3,021,686
+      ['fallocate', '275G', '200G']:	205,443
+      ['mega-extent', '275G', '2G']:	2,974,288
+      ['mega-extent', '275G', '200G']:	204,617
+      ['mega-extent', '4E', '2G']:	2,975,611
+      ['mega-extent', '4E', '200G']:	205,234
+    ['psync']:
+      ['fallocate', '275G', '2G']:	310,511
+      ['fallocate', '275G', '200G']:	307,422
+      ['mega-extent', '275G', '2G']:	307,018
+      ['mega-extent', '275G', '200G']:	305,365
+      ['mega-extent', '4E', '2G']:	304,472
+      ['mega-extent', '4E', '200G']:	305,102
+  - Ignored 0 configs due to values not requested in comparison
+  - Ignored 0 configs where not all variants were tested
+
+[1m2023-01-14 18:23:35,100 INFO:[0m Comparing selected values for ['btrfs.virtual_data_size']:
+  - Best-config IOPS by ['fio.engine']:
+    ['io_uring']:
+      ['275G']:	638,144
+      ['4E']:	634,542
+    ['mmap']:
+      ['275G']:	2,974,288
+      ['4E']:	2,975,611
+    ['psync']:
+      ['275G']:	307,018
+      ['4E']:	305,102
+  - Ignored 0 configs due to values not requested in comparison
+  - Ignored 32 configs where not all variants were tested
+
+[1m2023-01-14 18:23:35,106 INFO:[0m Comparing selected values for ['btrfs.seed']:
+  - Best-config IOPS by ['fio.engine']:
+    ['io_uring']:
+      ['fallocate']:	642,504
+      ['mega-extent']:	638,144
+    ['mmap']:
+      ['fallocate']:	3,021,686
+      ['mega-extent']:	2,974,288
+    ['psync']:
+      ['fallocate']:	310,511
+      ['mega-extent']:	307,018
+  - Ignored 0 configs due to values not requested in comparison
+  - Ignored 32 configs where not all variants were tested
+
+[1m2023-01-14 18:23:35,114 INFO:[0m Comparing selected values for ['btrfs.total_clone_size']:
+  - Best-config IOPS by ['fio.engine']:
+    ['io_uring']:
+      ['200G']:	631,705
+      ['2G']:	642,504
+    ['mmap']:
+      ['200G']:	205,443
+      ['2G']:	3,021,686
+    ['psync']:
+      ['200G']:	307,422
+      ['2G']:	310,511
+  - Ignored 0 configs due to values not requested in comparison
+  - Ignored 0 configs where not all variants were tested
+
+[1m2023-01-14 18:23:35,118 INFO:[0m Comparing selected values for ['fio.depth']:
+  - Best-config IOPS by ['fio.engine', 'fio.jobs']:
+    ['io_uring', 1]:
+      [4]:	224,401
+      [16]:	223,894
+    ['io_uring', 2]:
+      [4]:	360,692
+      [16]:	346,931
+    ['io_uring', 6]:
+      [4]:	565,593
+      [16]:	600,620
+    ['io_uring', 12]:
+      [4]:	577,349
+      [16]:	642,504
+  - Ignored 0 configs due to values not requested in comparison
+  - Ignored 48 configs where not all variants were tested
+
+[1m2023-01-14 18:23:35,127 INFO:[0m Comparing selected values for ['fio.jobs', 'ublk.num_queues']:
+  - Best-config IOPS by ['fio.engine', 'btrfs.total_clone_size']:
+    ['io_uring', '200G']:
+      [1, 2]:	224,401
+      [2, 2]:	345,736
+      [6, 3]:	592,362
+      [12, 3]:	631,705
+    ['io_uring', '2G']:
+      [1, 2]:	222,592
+      [2, 2]:	360,692
+      [6, 3]:	600,620
+      [12, 3]:	642,504
+    ['mmap', '200G']:
+      [1, 2]:	55,776
+      [2, 2]:	94,840
+      [6, 3]:	176,409
+      [12, 3]:	205,443
+    ['mmap', '2G']:
+      [1, 2]:	151,257
+      [2, 2]:	714,243
+      [6, 3]:	2,514,038
+      [12, 3]:	3,021,686
+    ['psync', '200G']:
+      [1, 2]:	77,456
+      [2, 2]:	125,378
+      [6, 3]:	243,769
+      [12, 3]:	307,422
+    ['psync', '2G']:
+      [1, 2]:	78,316
+      [2, 2]:	126,181
+      [6, 3]:	246,442
+      [12, 3]:	310,511
+  - Ignored 0 configs due to values not requested in comparison
+  - Ignored 0 configs where not all variants were tested
+

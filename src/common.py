@@ -26,6 +26,13 @@ def get_logger():
     )
 
 
+def init_logging():
+    logging.basicConfig(
+        level=logging.INFO,
+        format='\x1b[1m%(asctime)s %(levelname)s:\x1b[0m %(message)s',
+    )
+
+
 class SZ:
     K = 2**10
     M = 2**20

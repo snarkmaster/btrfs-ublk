@@ -1,12 +1,11 @@
 import argparse
-import logging
 import subprocess
 import sys
 from contextlib import contextmanager
 from pathlib import Path
 from typing import List, Optional
 
-from .common import get_logger, suffixed_byte_size
+from .common import get_logger, init_logging, suffixed_byte_size
 
 log = get_logger()
 
@@ -21,10 +20,7 @@ def init_cli(description: str, argv: Optional[List[str]] = None):
     if argv is None:
         argv = sys.argv
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format='\x1b[1m%(asctime)s %(levelname)s:\x1b[0m %(message)s',
-    )
+    init_logging()
 
     if subprocess.run(['capsh', '--has-p=CAP_SYS_ADMIN'], stdout=2).returncode:
         log.error(f'Please run this via `sudo ./isolate.sh {argv[0]}`')
