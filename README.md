@@ -57,7 +57,7 @@ Each program has a top-of-file docblock explaining the details.
     https://github.com/snarkmaster/btrfs-ublk/blob/main/benchmark_matrix.py#L36).
 
   - [`benchmark.py`](benchmark.py), [`benchmark_matrix.py`](
-    benchmark_matrix.py), [benchmark_matrix_summarize.py](
+    benchmark_matrix.py), [`benchmark_matrix_summarize.py`](
     benchmark_matrix_summarize.py): Exercises `btrfs-ublk` with 4KiB random
     reads (the type of IO most sensitive to "plumbing overhead") in a
     variety of settings, and produces a human-readable summary.  See the
@@ -126,7 +126,7 @@ TODO: Link to discussion of the limitations, and what to do about them.
 
 # OS-speficic initial setup
 
-## Fedora 36
+## Fedora
 
 ```
 dnf install -y automake autoconf libtool e2fsprogs-devel libzstd-devel black \
@@ -306,6 +306,7 @@ subsystem causes the slowdown -- or is it a combination of the above?
  - `io_uring` benchmarks show over 1.5M QPS-per-core on stock hardware.
  - `ublk` [demonstrated 1.2M IOPS](
     https://github.com/ming1/ubdsrv/blob/master/doc/ublk_intro.pdf).
+
 Looking at the comparisons below, it's pretty clear that `btrfs` is the slowest
 piece of the puzzle. And, the performance of `btrfs-ublk` is comparable to
 `btrfs` on ramdisk -- at most 27% slower on `psync`, and on-par/faster with
@@ -315,25 +316,28 @@ piece of the puzzle. And, the performance of `btrfs-ublk` is comparable to
 ## Comparison: FUSE
 
 The [Direct-FUSE paper](https://www.osti.gov/servlets/purl/1458703) has the
-fastest published benchmark I've found showing "speed-of-light" for FUSE. 
-For 4KiB random reads via FUSE on top of tmpfs, they [report ~117MiB/s or
-29k IOPS](https://github.com/LLNL/direct-fuse/blob/master/results/rand_read.dat). 
+fastest published benchmark I've found showing a "speed-of-light" for FUSE. 
+Measuring 4KiB random reads via FUSE on top of tmpfs, they [report ~117MiB/s
+or 29k IOPS](
+https://github.com/LLNL/direct-fuse/blob/master/results/rand_read.dat). 
 Unfortunately, the paper does not make it not clear whether this is "per
 core" or "maximum throughput achievable on the 10-core Xeon machine under
-test".  Other, benchmarks were even less convincing -- one reported as low
-as [25 MiB/s 4KiB random reads (6400 IOPS) with a single
+test".  Other benchmarks from my search were even less convincing -- one
+reported as low as [25 MiB/s 4KiB random reads (6400 IOPS) with a single
 reader](https://lwn.net/Articles/843873/).
 
 We benchmarked EdenFS (FUSE) on a **server**, whose Skylake CPU had 20
-physical cores (2Ghz regular, 3.7Ghz turbo), and 256GiB of DDR4. RAM 
-bandwidth estimated at 17GiB/sec per `dd` as above.
+physical cores (2Ghz regular, 3.7Ghz turbo), and 256GiB of DDR4.  RAM
+bandwidth estimated at 17GiB/sec per `dd` as above.  The test was repeated
+so as to effectively be serving from Eden's RAM cache, so this test measures
+the overhead of a reasonably well-optimized, production FUSE filesystem.
 
 As with `btrfs-ublk`, I took note of the total number of cores used by `fio`
 and `edenfs` in `top`, during the middle of the benchmark.
 
 The results:
-  - 18 readers: 195k IOPS -- 7 cores
   - 1 reader: 68k IOPS -- 2.5 cores
+  - 18 readers: 195k IOPS -- 7 cores
 
 ```
 cd ~/eden-repo
@@ -349,7 +353,7 @@ trace is kernel code, and locks.
 
 So, while FUSE isn't as slow as other literature suggests, you need 7 cores
 worth of CPU to reach half the throughput of a consumer SSD.  Whereas
-`btrfs-ublk` reaches this with a single reader and 2 cores.
+`btrfs-ublk` reaches these IOPS with a single reader and < 2 cores.
 
 Notes:
   - `--numa_cpu_nodes=0-0` is applied since this was a 2-socket system, and
@@ -424,8 +428,8 @@ Intended as a "block IO speed-of-light" test, but I wouldn't overinterpret
 it since `/dev/zero` isn't quite a real block device.  Single reader, no
 `--direct=1` since `/dev/zero` doesn't support that.  Avoiding `io_uring`
 since it's slower in this setting for some reason.
- - laptop: 1000k 4KiB IOPS
- - server: 1150k IOPS
+ - laptop, 1 reader: 1000k 4KiB IOPS
+ - server, 1 reader: 1150k IOPS
 
 ```
 fio --name=rand-4k --bs=4k --ioengine=psync --rw=randread --runtime=20 \
